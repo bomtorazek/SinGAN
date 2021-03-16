@@ -25,9 +25,12 @@ def np2torch(x,opt):
     if opt.nc_im == 3:
         x = x[:,:,:,None]
         x = x.transpose((3, 2, 0, 1))/255
-    else:
-        x = color.rgb2gray(x)
+
+    elif opt.nc_im == 1:
+        # x = np.concatenate([x,x,x], axis = 2)
+        # x = color.rgb2gray(x)
         x = x[:,:,None,None]
+        
         x = x.transpose(3, 2, 0, 1)
     x = torch.from_numpy(x)
     if not (opt.not_cuda):
@@ -48,6 +51,7 @@ def torch2uint8(x):
 
 def imresize(im,scale,opt):
     #s = im.shape
+
     im = torch2uint8(im)
     im = imresize_in(im, scale_factor=scale)
     im = np2torch(im,opt)

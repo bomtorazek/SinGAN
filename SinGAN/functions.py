@@ -26,7 +26,7 @@ def denorm(x):
     return out.clamp(0, 1)
 
 def norm(x):
-    out = (x -0.5) *2
+    out = (x -0.5) *2 # -1 ~ 1
     return out.clamp(-1, 1)
 
 #def denorm2image(I1,I2):
@@ -160,12 +160,17 @@ def read_image_dir(dir,opt):
 
 def np2torch(x,opt):
     if opt.nc_im == 3:
-        x = x[:,:,:,None]
+        if x.ndim ==2:
+            x = np.expand_dims(x, axis = 2)
+            x = np.concatenate([x,x,x], axis = 2)
+        x = x[:,:,:,None] # same as expand_dims
         x = x.transpose((3, 2, 0, 1))/255
-    else:
+    elif opt.nc_im == 1:
+        # x = np.expand_dims(x, axis = 2)
+        # x = np.concatenate([x,x,x], axis = 2)
         x = color.rgb2gray(x)
         x = x[:,:,None,None]
-        x = x.transpose(3, 2, 0, 1)
+        x = x.transpose((3, 2, 0, 1))
     x = torch.from_numpy(x)
     if not(opt.not_cuda):
         x = move_to_gpu(x)
