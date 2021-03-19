@@ -115,9 +115,9 @@ def reset_grads(model,require_grad):
         p.requires_grad_(require_grad)
     return model
 
-def move_to_gpu(t):
+def move_to_gpu(t, device):
     if (torch.cuda.is_available()):
-        t = t.to(torch.device('cuda'))
+        t = t.to(device)
     return t
 
 def move_to_cpu(t):
@@ -173,7 +173,7 @@ def np2torch(x,opt):
         x = x.transpose((3, 2, 0, 1))
     x = torch.from_numpy(x)
     if not(opt.not_cuda):
-        x = move_to_gpu(x)
+        x = move_to_gpu(x, opt.device)
     x = x.type(torch.cuda.FloatTensor) if not(opt.not_cuda) else x.type(torch.FloatTensor)
     #x = x.type(torch.FloatTensor)
     x = norm(x)
@@ -286,7 +286,7 @@ def generate_dir2save(opt):
 
 def post_config(opt):
     # init fixed parameters
-    opt.device = torch.device("cpu" if opt.not_cuda else "cuda:0")
+    opt.device = torch.device("cpu" if opt.not_cuda else f"cuda:{opt.gpu}")
     opt.niter_init = opt.niter
     opt.noise_amp_init = opt.noise_amp
     opt.nfc_init = opt.nfc
@@ -318,7 +318,7 @@ def quant(prev,device):
     centers = kmeans.cluster_centers_
     x = centers[labels]
     x = torch.from_numpy(x)
-    x = move_to_gpu(x)
+    x = move_to_gpu(x,device)
     x = x.type(torch.cuda.FloatTensor) if () else x.type(torch.FloatTensor)
     #x = x.type(torch.FloatTensor.to(device))
     x = x.view(prev.shape)
@@ -331,7 +331,7 @@ def quant2centers(paint, centers):
     #centers = kmeans.cluster_centers_
     x = centers[labels]
     x = torch.from_numpy(x)
-    x = move_to_gpu(x)
+    x = move_to_gpu(x, device)
     x = x.type(torch.cuda.FloatTensor) if torch.cuda.is_available() else x.type(torch.FloatTensor)
     #x = x.type(torch.cuda.FloatTensor)
     x = x.view(paint.shape)
